@@ -1,6 +1,33 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from .models import Message
+# myassistant/views.py
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+@csrf_exempt
+def process_command(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            command = data.get('command', '').lower()
+            print(command)
+            response_text = handle_command(command)
+            return JsonResponse({'response': response_text[20:]})
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def handle_command(command):
+    # Interroge la base de données pour trouver une réponse correspondant à la commande
+    response = Message.objects.filter(command__icontains=command).first()
+    if response:
+        return response.response
+    else:
+        return "Sorry, I didn't understand that command."
+
 
 # Create your views here.
 def home(request, *args, **kwargs):
@@ -15,6 +42,7 @@ def reponse(request):
     #new_msg = Message.objects.create(value=message, reponse=reponse)
     #new_msg.save()
     return HttpResponse(reponse)
+
 
 
 
@@ -55,12 +83,12 @@ def accent(words):
             'é':'e', 'è':'e', 'ê':'e', 'ë':'e',
             'à':'a', 'â':'a',
             'î':'i', 'ï':'i',
-            'ô':'o','ç':'c'}
+            'ô':'o','ç':'c','.':''}
     sent = []
     for mot in words:
         mot1 = list(mot)
         for l in mot:
-            if l in ['û', 'ù', 'ü', 'é', 'è', 'ê', 'ë', 'à', 'â', 'î', 'ï', 'ô', 'ç']:
+            if l in ['û', 'ù', 'ü', 'é', 'è', 'ê', 'ë', 'à', 'â', 'î', 'ï', 'ô', 'ç','.']:
                 mot1[mot1.index(l)] = dict[l]
         sent.append(''.join(mot1))
     return sent
@@ -106,6 +134,7 @@ def most_similary(text):
 
 
 def get_response(message):
+    
     msg, max_sim = most_similary(message)
     max_sim = max_sim
     if max_sim >= 0.7:
@@ -118,5 +147,4 @@ def get_response(message):
         return "Desolé, je ne suis capable de repondre qu'aux question qui ont trait a l'ENSPD"
         
     
-
 
