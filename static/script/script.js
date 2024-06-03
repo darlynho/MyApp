@@ -60,7 +60,7 @@ if (savedTheme === 'dark') {
 
 
 // Icons made by Freepik from www.flaticon.com
-const BOT_IMG = "NadIA p";
+const BOT_IMG = "NadIA pe";
 const PERSON_IMG = "user";
 const BOT_NAME = "NadIA";
 const PERSON_NAME = "Vous";
@@ -143,3 +143,64 @@ function formatDate(date) {
 
     return `${h.slice(-2)}:${m.slice(-2)}`;
 }
+
+
+const startButton = document.getElementById('startButton');
+const resultDisplay = document.getElementById('result');
+
+// Check for browser compatibility
+if (!('webkitSpeechRecognition' in window)) {
+    alert('Your browser does not support speech recognition. Try Chrome.');
+} else {
+    const recognition = new webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+        startButton.disabled = true;
+        startButton.textContent = 'En cours...';
+    };
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        //resultDisplay.textContent = 'Recognized command: ' + transcript;
+        appendMessage(PERSON_NAME, PERSON_IMG, "right", transcript);
+        botResponse(transcript);
+        startButton.disabled = false;
+        startButton.textContent = 'Voice';
+        // Send the recognized command to the server for processing
+        processCommand(transcript);
+    };
+
+    recognition.onerror = (event) => {
+        console.error('Speech recognition error', event);
+        startButton.disabled = false;
+        startButton.textContent = 'Voice';
+    };
+
+    recognition.onend = () => {
+        startButton.disabled = false;
+        startButton.textContent = 'Voice';
+    };
+
+    startButton.addEventListener('click', () => {
+        recognition.start();
+    });
+
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+};
