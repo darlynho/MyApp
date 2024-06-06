@@ -146,5 +146,6 @@ def get_response(message):
     else:
         return "Desolé, je ne suis capable de repondre qu'aux question qui ont trait a l'ENSPD"
         
+
     
 

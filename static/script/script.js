@@ -204,3 +204,4 @@ if (!('webkitSpeechRecognition' in window)) {
         return cookieValue;
     }
 };
+
